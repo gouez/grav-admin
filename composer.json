@@ -1,0 +1,15 @@
+{
+  "name": "gouxiaosong/laser-admin",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "Apache-2.0",
+  "type": "library",
+  "authors": [
+    {
+      "name": "gouxiaosong",
+      "email": "gqsforme@gmail.com"
+    }
+  ],
+  "require": {
+  }
+}
