@@ -10,8 +10,6 @@ $bundles = [
     Symfony\Bundle\DebugBundle\DebugBundle::class => ['dev' => true, 'test' => true],
     Laser\Core\Framework\Framework::class => ['all' => true],
     Laser\Core\System\System::class => ['all' => true],
-    Laser\Core\Content\Content::class => ['all' => true],
-    Laser\Core\Checkout\Checkout::class => ['all' => true],
     Laser\Core\DevOps\DevOps::class => ['all' => true],
     Laser\Core\Maintenance\Maintenance::class => ['all' => true],
 ];
