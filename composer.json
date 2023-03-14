@@ -90,8 +90,9 @@
     }
   },
   "autoload": {
-    "files":[
-
+    "files": [
+      "src/Core/Framework/Adapter/Doctrine/Patch/AbstractAsset.php",
+      "src/Core/Framework/Adapter/Twig/functions.php"
     ],
     "psr-4": {
       "Laser\\Core\\": "src/Core/"
