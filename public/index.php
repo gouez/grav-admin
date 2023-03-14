@@ -9,7 +9,12 @@ use Symfony\Component\HttpKernel\TerminableInterface;
 
 $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-require_once __DIR__ . '/../vendor/autoload_runtime.php';
+$autoload = __DIR__ . '/../vendor/autoload_runtime.php';
+if (!is_file($autoload)) {
+    die('Please run: <i>bin/laser install</i>');
+}
+
+require_once $autoload;
 
 if (!file_exists(__DIR__ . '/../.env') && !file_exists(__DIR__ . '/../.env.dist') && !file_exists(__DIR__ . '/../.env.local.php')) {
     $_SERVER['APP_RUNTIME_OPTIONS']['disable_dotenv'] = true;
@@ -24,7 +29,7 @@ return function (array $context) {
         $baseURL = str_replace(basename(__FILE__), '', $_SERVER['SCRIPT_NAME']);
         $baseURL = rtrim($baseURL, '/');
 
-        if (strpos($_SERVER['REQUEST_URI'], '/installer') === false) {
+        if (!str_contains($_SERVER['REQUEST_URI'], '/installer')) {
             header('Location: ' . $baseURL . '/installer');
             exit;
         }
@@ -44,7 +49,7 @@ return function (array $context) {
     }
 
     $appEnv = $context['APP_ENV'] ?? 'dev';
-    $debug = (bool) ($context['APP_DEBUG'] ?? ($appEnv !== 'prod'));
+    $debug = (bool)($context['APP_DEBUG'] ?? ($appEnv !== 'prod'));
 
     $trustedProxies = $context['TRUSTED_PROXIES'] ?? false;
     if ($trustedProxies) {
