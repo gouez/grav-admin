@@ -1,0 +1,111 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!-- Filesystem -->
+        <service id="Laser\Core\Framework\Adapter\Filesystem\FilesystemFactory">
+            <argument type="tagged" tag="laser.filesystem.factory"/>
+        </service>
+
+        <service class="League\Flysystem\FilesystemOperator" id="laser.filesystem.public" public="true">
+            <factory service="Laser\Core\Framework\Adapter\Filesystem\FilesystemFactory" method="factory"/>
+            <argument>%laser.filesystem.public%</argument>
+        </service>
+
+        <service class="League\Flysystem\FilesystemOperator" id="laser.filesystem.private" public="true">
+            <factory service="Laser\Core\Framework\Adapter\Filesystem\FilesystemFactory" method="privateFactory"/>
+            <argument>%laser.filesystem.private%</argument>
+        </service>
+
+        <service class="League\Flysystem\FilesystemOperator" id="laser.filesystem.temp" public="true">
+            <factory service="Laser\Core\Framework\Adapter\Filesystem\FilesystemFactory" method="privateFactory"/>
+            <argument>%laser.filesystem.temp%</argument>
+        </service>
+
+        <service class="League\Flysystem\FilesystemOperator" id="laser.filesystem.theme" public="true">
+            <factory service="Laser\Core\Framework\Adapter\Filesystem\FilesystemFactory" method="factory"/>
+            <argument>%laser.filesystem.theme%</argument>
+        </service>
+
+        <service class="League\Flysystem\FilesystemOperator" id="laser.filesystem.sitemap" public="true">
+            <factory service="Laser\Core\Framework\Adapter\Filesystem\FilesystemFactory" method="factory"/>
+            <argument>%laser.filesystem.sitemap%</argument>
+        </service>
+
+        <service class="League\Flysystem\FilesystemOperator" id="laser.filesystem.asset" public="true">
+            <factory service="Laser\Core\Framework\Adapter\Filesystem\FilesystemFactory" method="factory"/>
+            <argument>%laser.filesystem.asset%</argument>
+        </service>
+
+        <service class="Laser\Core\Framework\Adapter\Filesystem\Adapter\LocalFactory" id="Laser\Core\Framework\Adapter\Filesystem\FilesystemFactory.local">
+            <tag name="laser.filesystem.factory"/>
+        </service>
+
+        <service class="Laser\Core\Framework\Adapter\Filesystem\Adapter\AwsS3v3Factory" id="Laser\Core\Framework\Adapter\Filesystem\FilesystemFactory.amazon_s3">
+            <tag name="laser.filesystem.factory"/>
+        </service>
+
+        <service class="Laser\Core\Framework\Adapter\Filesystem\Adapter\GoogleStorageFactory" id="Laser\Core\Framework\Adapter\Filesystem\FilesystemFactory.google_storage">
+            <tag name="laser.filesystem.factory"/>
+        </service>
+
+        <service id="League\Flysystem\PathPrefixing\PathPrefixedAdapter">
+            <argument type="service" id="laser.filesystem.public"/>
+            <argument>media</argument>
+        </service>
+
+        <service id="console.command.assets_install" class="Laser\Core\Framework\Adapter\Asset\AssetInstallCommand">
+            <argument type="service" id="kernel"/>
+            <argument type="service" id="Laser\Core\Framework\Plugin\Util\AssetService"/>
+            <argument type="service" id="Laser\Core\Framework\App\ActiveAppsLoader"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Assets -->
+        <service id="laser.asset.public" class="Laser\Core\Framework\Adapter\Asset\FallbackUrlPackage" lazy="true">
+            <argument type="collection">
+                <argument>%laser.filesystem.public.url%</argument>
+            </argument>
+            <argument type="service" id="assets.empty_version_strategy"/>
+            <tag name="laser.asset" asset="public"/>
+        </service>
+
+        <service id="laser.asset.theme.version_strategy" class="Laser\Core\Framework\Adapter\Asset\FlysystemLastModifiedVersionStrategy">
+            <argument>theme-metaData</argument>
+            <argument type="service" id="laser.filesystem.theme"/>
+            <argument type="service" id="cache.object"/>
+        </service>
+
+        <service id="laser.asset.asset.version_strategy" class="Laser\Core\Framework\Adapter\Asset\FlysystemLastModifiedVersionStrategy">
+            <argument>asset-metaData</argument>
+            <argument type="service" id="laser.filesystem.asset"/>
+            <argument type="service" id="cache.object"/>
+        </service>
+
+        <service id="laser.asset.asset" class="Laser\Core\Framework\Adapter\Asset\FallbackUrlPackage" lazy="true">
+            <argument type="collection">
+                <argument>%laser.filesystem.asset.url%</argument>
+            </argument>
+            <argument type="service" id="laser.asset.asset.version_strategy"/>
+            <tag name="laser.asset" asset="asset"/>
+        </service>
+
+        <service id="laser.asset.asset_without_versioning" class="Laser\Core\Framework\Adapter\Asset\FallbackUrlPackage" lazy="true">
+            <argument type="collection">
+                <argument>%laser.filesystem.asset.url%</argument>
+            </argument>
+            <argument type="service" id="assets.empty_version_strategy"/>
+        </service>
+
+        <service id="laser.asset.sitemap" class="Laser\Core\Framework\Adapter\Asset\FallbackUrlPackage" lazy="true">
+            <argument type="collection">
+                <argument>%laser.filesystem.sitemap.url%</argument>
+            </argument>
+            <argument type="service" id="assets.empty_version_strategy"/>
+            <tag name="laser.asset" asset="sitemap"/>
+        </service>
+    </services>
+</container>

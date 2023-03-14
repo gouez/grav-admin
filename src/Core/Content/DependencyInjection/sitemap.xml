@@ -1,0 +1,117 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="Laser\Core\Content\Sitemap\Service\SitemapExporter">
+            <argument type="tagged" tag="laser.sitemap_url_provider"/>
+            <argument type="service" id="cache.system"/>
+            <argument>%laser.sitemap.batchsize%</argument>
+            <argument type="service" id="laser.filesystem.sitemap"/>
+            <argument type="service" id="Laser\Core\Content\Sitemap\Service\SitemapHandleFactoryInterface"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="Laser\Core\Content\Sitemap\Service\SitemapLister">
+            <argument type="service" id="laser.filesystem.sitemap"/>
+            <argument type="service" id="laser.asset.sitemap"/>
+        </service>
+
+        <service id="Laser\Core\Content\Sitemap\Service\ConfigHandler">
+            <argument type="tagged" tag="laser.sitemap.config_handler"/>
+        </service>
+
+        <service id="Laser\Core\Content\Sitemap\Service\SitemapHandleFactoryInterface" class="Laser\Core\Content\Sitemap\Service\SitemapHandleFactory">
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="Laser\Core\Content\Sitemap\SalesChannel\SitemapRoute" public="true">
+            <argument type="service" id="Laser\Core\Content\Sitemap\Service\SitemapLister"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Laser\Core\Content\Sitemap\Service\SitemapExporter"/>
+        </service>
+
+        <service id="Laser\Core\Content\Sitemap\SalesChannel\CachedSitemapRoute" decorates="Laser\Core\Content\Sitemap\SalesChannel\SitemapRoute" decoration-priority="-1000" public="true">
+            <argument type="service" id="Laser\Core\Content\Sitemap\SalesChannel\CachedSitemapRoute.inner"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Cache\EntityCacheKeyGenerator"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheTracer"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument>%laser.cache.invalidation.sitemap_route%</argument>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <!-- UrlProviders -->
+        <service id="Laser\Core\Content\Sitemap\Provider\HomeUrlProvider">
+            <tag name="laser.sitemap_url_provider"/>
+        </service>
+
+        <service id="Laser\Core\Content\Sitemap\Provider\CategoryUrlProvider">
+            <argument type="service" id="Laser\Core\Content\Sitemap\Service\ConfigHandler"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Laser\Core\Content\Category\CategoryDefinition"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Dbal\Common\IteratorFactory"/>
+            <argument type="service" id="router"/>
+
+            <tag name="laser.sitemap_url_provider"/>
+        </service>
+
+        <service id="Laser\Core\Content\Sitemap\Provider\CustomUrlProvider">
+            <argument type="service" id="Laser\Core\Content\Sitemap\Service\ConfigHandler"/>
+
+            <tag name="laser.sitemap_url_provider"/>
+        </service>
+
+        <service id="Laser\Core\Content\Sitemap\Provider\ProductUrlProvider">
+            <argument type="service" id="Laser\Core\Content\Sitemap\Service\ConfigHandler"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Laser\Core\Content\Product\ProductDefinition"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Dbal\Common\IteratorFactory"/>
+            <argument type="service" id="router"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+
+            <tag name="laser.sitemap_url_provider"/>
+        </service>
+
+        <!-- Config Handler -->
+        <service id="Laser\Core\Content\Sitemap\ConfigHandler\File">
+            <argument>%laser.sitemap%</argument>
+            <tag name="laser.sitemap.config_handler"/>
+        </service>
+
+        <!-- Commands -->
+        <service id="Laser\Core\Content\Sitemap\Commands\SitemapGenerateCommand">
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="Laser\Core\Content\Sitemap\Service\SitemapExporter"/>
+            <argument type="service" id="Laser\Core\System\SalesChannel\Context\SalesChannelContextFactory"/>
+            <argument type="service" id="event_dispatcher"/>
+
+            <tag name="console.command"/>
+        </service>
+
+        <!-- scheduled task -->
+        <service id="Laser\Core\Content\Sitemap\ScheduledTask\SitemapGenerateTask">
+            <tag name="laser.scheduled.task"/>
+        </service>
+
+        <service id="Laser\Core\Content\Sitemap\ScheduledTask\SitemapGenerateTaskHandler">
+            <argument type="service" id="scheduled_task.repository"/>
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="messenger.bus.laser"/>
+            <argument type="service" id="event_dispatcher"/>
+
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <service id="Laser\Core\Content\Sitemap\ScheduledTask\SitemapMessageHandler">
+            <argument type="service" id="Laser\Core\System\SalesChannel\Context\SalesChannelContextFactory"/>
+            <argument type="service" id="Laser\Core\Content\Sitemap\Service\SitemapExporter"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+
+            <tag name="messenger.message_handler"/>
+        </service>
+    </services>
+</container>

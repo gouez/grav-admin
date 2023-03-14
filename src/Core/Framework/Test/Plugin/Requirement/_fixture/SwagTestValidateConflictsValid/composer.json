@@ -1,0 +1,24 @@
+{
+    "name": "swag/test-validate-conflicts-valid",
+    "description": "Test conflict handling",
+    "version": "v1.0.0",
+    "type": "laser-platform-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "laser AG",
+            "role": "Manufacturer"
+        }
+    ],
+    "conflict": {
+        "laser/storefront": "< 6.1.0"
+    },
+    "extra": {
+        "laser-plugin-class": "SwagTestValidateConflictsValid\\SwagTestValidateConflictsValid",
+        "copyright": "(c) by laser AG",
+        "label": {
+            "de-DE": "Test für Konflikte-Handling",
+            "en-GB": "Test for conflict handling"
+        }
+    }
+}

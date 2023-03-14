@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <defaults autowire="true"/>
+
+        <service id="Laser\Core\DevOps\System\Command\SyncComposerVersionCommand">
+            <argument>%kernel.project_dir%</argument>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\DevOps\Docs\App\DocsAppEventCommand">
+            <argument type="service" id="Laser\Core\Framework\Event\BusinessEventCollector"/>
+            <argument type="service" id="Laser\Core\Framework\Webhook\Hookable\HookableEventCollector"/>
+            <argument type="service" id="twig"/>
+
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\DevOps\Docs\Script\ScriptReferenceGeneratorCommand">
+            <argument type="tagged" tag="laser.scripts_reference.generator"/>
+
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\DevOps\Docs\Script\HooksReferenceGenerator">
+            <argument type="service" id="service_container"/>
+            <argument type="service" id="twig"/>
+            <argument type="service" id="Laser\Core\DevOps\Docs\Script\ServiceReferenceGenerator"/>
+
+            <tag name="laser.scripts_reference.generator"/>
+        </service>
+
+        <service id="Laser\Core\DevOps\Docs\Script\ServiceReferenceGenerator">
+            <argument type="service" id="twig"/>
+            <argument>%kernel.project_dir%</argument>
+
+            <tag name="laser.scripts_reference.generator"/>
+        </service>
+    </services>
+</container>

@@ -1,0 +1,23 @@
+{
+    "name": "swag/test",
+    "description": "Test description",
+    "version": "v1.0.1",
+    "type": "laser-platform-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "laser AG",
+            "role": "Manufacturer"
+        }
+    ],
+    "require": {
+        "laser/platform": "6.4.*@dev"
+    },
+    "extra": {
+        "laser-plugin-class": "Works\\Works",
+        "label": {
+            "en-GB": "Test plugin",
+            "de-DE": "Test plugin"
+        }
+    }
+}

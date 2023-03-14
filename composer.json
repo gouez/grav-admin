@@ -88,5 +88,17 @@
       "cweagans/composer-patches": true,
       "symfony/runtime": true
     }
+  },
+  "autoload": {
+    "files":[
+
+    ],
+    "psr-4": {
+      "Laser\\Core\\": "src/Core/"
+    },
+    "exclude-from-classmap": [
+      "src/**/Test/",
+      "tests/"
+    ]
   }
 }

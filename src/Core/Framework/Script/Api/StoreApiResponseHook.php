@@ -1,0 +1,77 @@
+<?php declare(strict_types=1);
+
+namespace Laser\Core\Framework\Script\Api;
+
+use Laser\Core\Framework\DataAbstractionLayer\Facade\RepositoryFacadeHookFactory;
+use Laser\Core\Framework\DataAbstractionLayer\Facade\RepositoryWriterFacadeHookFactory;
+use Laser\Core\Framework\DataAbstractionLayer\Facade\SalesChannelRepositoryFacadeHookFactory;
+use Laser\Core\Framework\Log\Package;
+use Laser\Core\Framework\Script\Execution\Awareness\SalesChannelContextAware;
+use Laser\Core\Framework\Script\Execution\Awareness\ScriptResponseAwareTrait;
+use Laser\Core\Framework\Script\Execution\Awareness\StoppableHook;
+use Laser\Core\Framework\Script\Execution\Awareness\StoppableHookTrait;
+use Laser\Core\Framework\Script\Execution\FunctionHook;
+use Laser\Core\System\SalesChannel\SalesChannelContext;
+use Laser\Core\System\SystemConfig\Facade\SystemConfigFacadeHookFactory;
+
+/**
+ * Triggered when the api endpoint /store-api/script/{hook} is called. Used to provide the HTTP-Response.
+ * This function is only called when no response for the provided cache key is cached, or no `cache_key` function implemented.
+ *
+ * @hook-use-case custom_endpoint
+ *
+ * @since 6.4.9.0
+ */
+#[Package('core')]
+class StoreApiResponseHook extends FunctionHook implements SalesChannelContextAware, StoppableHook
+{
+    use ScriptResponseAwareTrait;
+    use StoppableHookTrait;
+
+    final public const FUNCTION_NAME = 'response';
+
+    public function __construct(
+        private readonly string $name,
+        private readonly array $request,
+        private readonly array $query,
+        private readonly SalesChannelContext $salesChannelContext
+    ) {
+        parent::__construct($salesChannelContext->getContext());
+    }
+
+    public function getRequest(): array
+    {
+        return $this->request;
+    }
+
+    public function getQuery(): array
+    {
+        return $this->query;
+    }
+
+    public function getSalesChannelContext(): SalesChannelContext
+    {
+        return $this->salesChannelContext;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getFunctionName(): string
+    {
+        return self::FUNCTION_NAME;
+    }
+
+    public static function getServiceIds(): array
+    {
+        return [
+            RepositoryFacadeHookFactory::class,
+            SystemConfigFacadeHookFactory::class,
+            SalesChannelRepositoryFacadeHookFactory::class,
+            RepositoryWriterFacadeHookFactory::class,
+            ScriptResponseFactoryFacadeHookFactory::class,
+        ];
+    }
+}

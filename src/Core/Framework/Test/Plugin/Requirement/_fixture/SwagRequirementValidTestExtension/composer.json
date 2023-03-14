@@ -1,0 +1,25 @@
+{
+  "name": "swag/requirement-valid-test-extension",
+  "description": "Test requirement validator",
+  "version": "v1.0.0",
+  "type": "laser-platform-plugin",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "laser AG",
+      "role": "Manufacturer"
+    }
+  ],
+  "require": {
+    "ext-json": "*",
+    "swag/requirement-valid-test": "*"
+  },
+  "extra": {
+    "laser-plugin-class": "SwagRequirementValidTestExtension\\SwagRequirementValidTestExtension",
+    "copyright": "(c) by laser AG",
+    "label": {
+      "de-DE": "Test für Requirement Validator",
+      "en-GB": "Test for requirement validator"
+    }
+  }
+}

@@ -1,0 +1,93 @@
+<?php
+declare(strict_types=1);
+
+namespace Laser\Core\Framework\DataAbstractionLayer\FieldSerializer;
+
+use Laser\Core\Framework\DataAbstractionLayer\Exception\InvalidSerializerFieldException;
+use Laser\Core\Framework\DataAbstractionLayer\Field\Field;
+use Laser\Core\Framework\DataAbstractionLayer\Field\ListField;
+use Laser\Core\Framework\DataAbstractionLayer\Write\DataStack\KeyValuePair;
+use Laser\Core\Framework\DataAbstractionLayer\Write\EntityExistence;
+use Laser\Core\Framework\DataAbstractionLayer\Write\FieldException\WriteFieldException;
+use Laser\Core\Framework\DataAbstractionLayer\Write\WriteParameterBag;
+use Laser\Core\Framework\Log\Package;
+use Symfony\Component\Validator\Constraints\Type;
+
+/**
+ * @internal
+ */
+#[Package('core')]
+class ListFieldSerializer extends AbstractFieldSerializer
+{
+    /**
+     * @throws InvalidSerializerFieldException
+     */
+    public function encode(
+        Field $field,
+        EntityExistence $existence,
+        KeyValuePair $data,
+        WriteParameterBag $parameters
+    ): \Generator {
+        if (!$field instanceof ListField) {
+            throw new InvalidSerializerFieldException(ListField::class, $field);
+        }
+
+        $this->validateIfNeeded($field, $existence, $data, $parameters);
+
+        $value = $data->getValue();
+
+        if ($value !== null) {
+            $value = array_values($value);
+
+            $this->validateTypes($field, $value, $parameters);
+
+            $value = JsonFieldSerializer::encodeJson($value);
+        }
+
+        yield $field->getStorageName() => $value;
+    }
+
+    public function decode(Field $field, mixed $value): ?array
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return array_values(json_decode((string) $value, true, 512, \JSON_THROW_ON_ERROR));
+    }
+
+    protected function getConstraints(Field $field): array
+    {
+        return [new Type('array')];
+    }
+
+    protected function validateTypes(ListField $field, array $values, WriteParameterBag $parameters): void
+    {
+        $fieldType = $field->getFieldType();
+        if ($fieldType === null) {
+            return;
+        }
+
+        $existence = new EntityExistence(null, [], false, false, false, []);
+
+        /** @var Field $listField */
+        $listField = new $fieldType('key', 'key');
+        $listField->compile($this->definitionRegistry);
+
+        $nestedParameters = $parameters->cloneForSubresource(
+            $parameters->getDefinition(),
+            $parameters->getPath() . '/' . $field->getPropertyName()
+        );
+
+        foreach ($values as $i => $value) {
+            try {
+                $kvPair = new KeyValuePair((string) $i, $value, true);
+
+                $x = $listField->getSerializer()->encode($listField, $existence, $kvPair, $nestedParameters);
+                $_x = iterator_to_array($x);
+            } catch (WriteFieldException $exception) {
+                $parameters->getContext()->getExceptions()->add($exception);
+            }
+        }
+    }
+}

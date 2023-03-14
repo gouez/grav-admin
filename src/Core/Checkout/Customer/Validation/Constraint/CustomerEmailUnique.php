@@ -1,0 +1,76 @@
+<?php declare(strict_types=1);
+
+namespace Laser\Core\Checkout\Customer\Validation\Constraint;
+
+use Laser\Core\Framework\Context;
+use Laser\Core\Framework\Log\Package;
+use Laser\Core\System\SalesChannel\SalesChannelContext;
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\Exception\MissingOptionsException;
+
+/**
+ * @Annotation
+ *
+ * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
+ */
+#[Package('customer-order')]
+class CustomerEmailUnique extends Constraint
+{
+    final public const CUSTOMER_EMAIL_NOT_UNIQUE = '79d30fe0-febf-421e-ac9b-1bfd5c9007f7';
+
+    /**
+     * @var string
+     */
+    public $message = 'The email address {{ email }} is already in use.';
+
+    /**
+     * @var Context
+     */
+    public $context;
+
+    /**
+     * @var SalesChannelContext
+     */
+    public $salesChannelContext;
+
+    /**
+     * @var array<string, string>
+     */
+    protected static $errorNames = [
+        self::CUSTOMER_EMAIL_NOT_UNIQUE => 'CUSTOMER_EMAIL_NOT_UNIQUE',
+    ];
+
+    /**
+     * @internal
+     */
+    public function __construct(array $options)
+    {
+        $options = array_merge(
+            [
+                'context' => null,
+                'salesChannelContext' => null,
+            ],
+            $options
+        );
+
+        parent::__construct($options);
+
+        if ($this->context === null) {
+            throw new MissingOptionsException(sprintf('Option "context" must be given for constraint %s', self::class), ['context']);
+        }
+
+        if ($this->salesChannelContext === null) {
+            throw new MissingOptionsException(sprintf('Option "salesChannelContext" must be given for constraint %s', self::class), ['salesChannelContext']);
+        }
+    }
+
+    public function getContext(): Context
+    {
+        return $this->context;
+    }
+
+    public function getSalesChannelContext(): SalesChannelContext
+    {
+        return $this->salesChannelContext;
+    }
+}

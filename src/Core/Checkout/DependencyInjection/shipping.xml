@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="Laser\Core\Checkout\Shipping\ShippingMethodDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Checkout\Shipping\SalesChannel\SalesChannelShippingMethodDefinition">
+            <tag name="laser.sales_channel.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Checkout\Shipping\Aggregate\ShippingMethodTag\ShippingMethodTagDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Checkout\Shipping\Aggregate\ShippingMethodPrice\ShippingMethodPriceDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Checkout\Shipping\Aggregate\ShippingMethodTranslation\ShippingMethodTranslationDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Checkout\Shipping\SalesChannel\ShippingMethodRoute" public="true">
+            <argument type="service" id="sales_channel.shipping_method.repository"/>
+        </service>
+
+        <service id="Laser\Core\Checkout\Shipping\SalesChannel\CachedShippingMethodRoute" decorates="Laser\Core\Checkout\Shipping\SalesChannel\ShippingMethodRoute" decoration-priority="-1000" public="true">
+            <argument type="service" id="Laser\Core\Checkout\Shipping\SalesChannel\CachedShippingMethodRoute.inner"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Cache\EntityCacheKeyGenerator"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheTracer"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument>%laser.cache.invalidation.shipping_method_route%</argument>
+        </service>
+
+        <service id="Laser\Core\Checkout\Shipping\SalesChannel\SortedShippingMethodRoute" decorates="Laser\Core\Checkout\Shipping\SalesChannel\ShippingMethodRoute" decoration-priority="-2000" public="true">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="Laser\Core\Framework\Script\Execution\ScriptExecutor"/>
+        </service>
+
+        <service id="Laser\Core\Checkout\Shipping\Validator\ShippingMethodValidator">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+    </services>
+</container>

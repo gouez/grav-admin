@@ -1,0 +1,36 @@
+{
+    "name": "swag-example-test/test",
+    "description": "Test description",
+    "version": "v1.0.1",
+    "type": "laser-platform-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "laser AG",
+            "role": "Manufacturer"
+        }
+    ],
+    "require": {
+        "laser/platform": "1.0.0"
+    },
+    "extra": {
+        "laser-plugin-class": "SwagTest\\SwagTest",
+        "copyright": "(c) by laser AG",
+        "label": {
+            "de-DE": "Deutscher Pluginname",
+            "en-GB": "English plugin name"
+        },
+        "description": {
+            "de-DE": "Deutsche Beschreibung",
+            "en-GB": "English description"
+        },
+        "manufacturerLink": {
+            "de-DE": "https://www.test.de/",
+            "en-GB": "https://www.test.com/"
+        },
+        "supportLink": {
+            "de-DE": "https://www.test.de/support",
+            "en-GB": "https://www.test.com/support"
+        }
+    }
+}

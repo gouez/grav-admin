@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="laser.increment.gateway.registry" class="Laser\Core\Framework\Increment\IncrementGatewayRegistry" public="true">
+            <argument type="tagged" tag="laser.increment.gateway"/>
+        </service>
+
+        <service id="laser.increment.gateway.mysql" class="Laser\Core\Framework\Increment\MySQLIncrementer">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="laser.increment.gateway.array" class="Laser\Core\Framework\Increment\ArrayIncrementer">
+            <tag name="kernel.reset" method="resetAll"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Increment\Controller\IncrementApiController" public="true">
+            <argument type="service" id="laser.increment.gateway.registry"/>
+        </service>
+
+    </services>
+</container>

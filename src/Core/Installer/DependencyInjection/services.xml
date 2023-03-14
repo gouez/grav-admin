@@ -1,0 +1,211 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <parameter key="laser.installer.supportedLanguages" type="collection">
+            <parameter key="de">de-DE</parameter>
+            <parameter key="en">en-GB</parameter>
+            <parameter key="us">en-US</parameter>
+            <parameter key="cs">cs-CZ</parameter>
+            <parameter key="es">es-ES</parameter>
+            <parameter key="fr">fr-FR</parameter>
+            <parameter key="it">it-IT</parameter>
+            <parameter key="nl">nl-NL</parameter>
+            <parameter key="pl">pl-PL</parameter>
+            <parameter key="pt">pt-PT</parameter>
+            <parameter key="sv">sv-SE</parameter>
+            <parameter key="da">da-DK</parameter>
+            <parameter key="nb">nb-NO</parameter>
+        </parameter>
+
+        <parameter key="laser.installer.supportedCurrencies" type="collection">
+            <parameter>EUR</parameter>
+            <parameter>USD</parameter>
+            <parameter>GBP</parameter>
+            <parameter>PLN</parameter>
+            <parameter>CHF</parameter>
+            <parameter>SEK</parameter>
+            <parameter>DKK</parameter>
+            <parameter>NOK</parameter>
+            <parameter>CZK</parameter>
+        </parameter>
+
+        <parameter key="laser.installer.tosUrls" type="collection">
+            <parameter key="de">https://api.laser.com/gtc/de_DE.html</parameter>
+            <parameter key="en">https://api.laser.com/gtc/en_GB.html</parameter>
+        </parameter>
+    </parameters>
+    <services>
+        <service id="laser.asset.asset" class="Laser\Core\Framework\Adapter\Asset\FallbackUrlPackage">
+            <argument type="collection">
+                <argument></argument>
+            </argument>
+            <argument type="service" id="laser.asset.version_strategy"/>
+            <tag name="assets.package" package="asset"/>
+        </service>
+
+        <service id="laser.asset.version_strategy" class="Symfony\Component\Asset\VersionStrategy\EmptyVersionStrategy"/>
+
+        <service id="Laser\Core\Installer\Subscriber\InstallerLocaleListener">
+            <argument>%laser.installer.supportedLanguages%</argument>
+
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Composer\Repository\PlatformRepository"/>
+
+        <service id="Composer\Composer">
+            <factory class="Laser\Core\Framework\Plugin\Composer\Factory" method="createComposer"/>
+            <argument type="string">%kernel.project_dir%</argument>
+        </service>
+
+
+        <service id="Laser\Core\Installer\Requirements\EnvironmentRequirementsValidator">
+            <argument type="service" id="Composer\Composer"/>
+            <argument type="service" id="Composer\Repository\PlatformRepository"/>
+
+            <tag name="laser.installer.requirement"/>
+        </service>
+
+        <service id="Laser\Core\Installer\Requirements\FilesystemRequirementsValidator">
+            <argument type="string">%kernel.project_dir%</argument>
+
+            <tag name="laser.installer.requirement"/>
+        </service>
+
+        <service id="Laser\Core\Installer\Requirements\ConfigurationRequirementsValidator">
+            <argument type="service" id="Laser\Core\Installer\Requirements\IniConfigReader"/>
+
+            <tag name="laser.installer.requirement"/>
+        </service>
+
+        <service id="Laser\Core\Installer\Requirements\IniConfigReader"/>
+
+        <service id="Laser\Core\Maintenance\System\Service\JwtCertificateGenerator"/>
+
+        <service id="laser.installer.guzzle" class="GuzzleHttp\Client"/>
+
+        <service id="Laser\Core\Installer\License\LicenseFetcher">
+            <argument type="service" id="laser.installer.guzzle"/>
+            <argument>%laser.installer.tosUrls%</argument>
+
+        </service>
+
+        <service id="Laser\Core\Installer\Controller\SelectLanguagesController" public="true">
+            <argument type="service" id="Laser\Core\Installer\Finish\Notifier"/>
+
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Laser\Core\Installer\Controller\RequirementsController" public="true">
+            <argument type="tagged_iterator" tag="laser.installer.requirement"/>
+            <argument type="service" id="Laser\Core\Maintenance\System\Service\JwtCertificateGenerator"/>
+            <argument type="string">%kernel.project_dir%</argument>
+
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Laser\Core\Installer\Controller\LicenseController" public="true">
+            <argument type="service" id="Laser\Core\Installer\License\LicenseFetcher"/>
+
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Laser\Core\Installer\Controller\DatabaseConfigurationController" public="true">
+            <argument type="service" id="translator"/>
+            <argument type="service" id="Laser\Core\Installer\Database\BlueGreenDeploymentService"/>
+            <argument type="service" id="Laser\Core\Maintenance\System\Service\JwtCertificateGenerator"/>
+            <argument type="service" id="Laser\Core\Maintenance\System\Service\SetupDatabaseAdapter"/>
+            <argument type="service" id="Laser\Core\Maintenance\System\Service\DatabaseConnectionFactory"/>
+            <argument type="string">%kernel.project_dir%</argument>
+
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Laser\Core\Installer\Controller\DatabaseImportController" public="true">
+            <argument type="service" id="Laser\Core\Maintenance\System\Service\DatabaseConnectionFactory"/>
+            <argument type="service" id="Laser\Core\Installer\Database\DatabaseMigrator"/>
+
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Laser\Core\Installer\Controller\ShopConfigurationController" public="true">
+            <argument type="service" id="Laser\Core\Maintenance\System\Service\DatabaseConnectionFactory"/>
+            <argument type="service" id="Laser\Core\Installer\Configuration\EnvConfigWriter"/>
+            <argument type="service" id="Laser\Core\Installer\Configuration\ShopConfigurationService"/>
+            <argument type="service" id="Laser\Core\Installer\Configuration\AdminConfigurationService"/>
+            <argument type="service" id="translator"/>
+            <argument>%laser.installer.supportedLanguages%</argument>
+            <argument>%laser.installer.supportedCurrencies%</argument>
+
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Laser\Core\Installer\Controller\FinishController" public="true">
+            <argument type="service" id="Laser\Core\Installer\Finish\SystemLocker"/>
+            <argument type="service" id="Laser\Core\Installer\Finish\Notifier"/>
+            <argument type="service" id="GuzzleHttp\Client"/>
+            <argument>%env(string:APP_URL)%</argument>
+
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Laser\Core\Installer\Database\BlueGreenDeploymentService"/>
+
+        <service id="Laser\Core\Maintenance\System\Service\SetupDatabaseAdapter"/>
+
+        <service id="Laser\Core\Maintenance\System\Service\DatabaseConnectionFactory"/>
+
+        <service id="Laser\Core\Installer\Database\DatabaseMigrator">
+            <argument type="service" id="Laser\Core\Maintenance\System\Service\SetupDatabaseAdapter"/>
+            <argument type="service" id="Laser\Core\Installer\Database\MigrationCollectionFactory"/>
+            <argument type="string">%kernel.laser_version%</argument>
+        </service>
+
+        <service id="Laser\Core\Installer\Database\MigrationCollectionFactory">
+            <argument type="string">%kernel.project_dir%</argument>
+        </service>
+
+        <service id="Laser\Core\Installer\Configuration\EnvConfigWriter">
+            <argument type="string">%kernel.project_dir%</argument>
+            <argument type="service" id="Laser\Core\Installer\Finish\UniqueIdGenerator"/>
+        </service>
+
+        <service id="Laser\Core\Installer\Configuration\ShopConfigurationService"/>
+
+        <service id="Laser\Core\Installer\Configuration\AdminConfigurationService"/>
+
+        <service id="Laser\Core\Installer\Finish\SystemLocker">
+            <argument type="string">%kernel.project_dir%</argument>
+        </service>
+
+        <service id="Laser\Core\Installer\Finish\Notifier">
+            <argument type="string">https://api.laser.com</argument>
+            <argument type="service" id="Laser\Core\Installer\Finish\UniqueIdGenerator"/>
+            <argument type="service" id="GuzzleHttp\Client"/>
+            <argument type="string">%kernel.laser_version%</argument>
+        </service>
+
+        <service id="Laser\Core\Installer\Finish\UniqueIdGenerator">
+            <argument type="string">%kernel.project_dir%</argument>
+        </service>
+
+        <service id="GuzzleHttp\Client"/>
+    </services>
+</container>

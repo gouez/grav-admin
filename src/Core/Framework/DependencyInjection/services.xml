@@ -1,0 +1,710 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:monolog="http://symfony.com/schema/dic/monolog"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd http://symfony.com/schema/dic/monolog http://symfony.com/schema/dic/monolog/monolog-1.0.xsd">
+
+    <parameters>
+        <parameter key="laser.slug.config" type="collection">
+            <parameter key="regexp">/([^A-Za-z0-9\.]|-)+/</parameter>
+            <parameter key="lowercase">false</parameter>
+        </parameter>
+
+        <!-- Populated by RouteScopeCompilerPass with all route prefixes from the registers RouteScopes -->
+        <parameter key="laser.routing.registered_api_prefixes" type="collection"/>
+
+        <!-- Migration config -->
+        <parameter key="core.migration.directories" type="collection"/>
+        <parameter key="migration.active" type="collection"/>
+
+        <parameter key="laser.security.csp_templates" type="collection">
+            <parameter key="default">
+object-src 'none';
+script-src 'none';
+base-uri 'self';
+            </parameter>
+            <parameter key="administration">
+object-src 'none';
+script-src 'strict-dynamic' 'nonce-%%nonce%%' 'unsafe-inline' 'unsafe-eval' https: http:;
+base-uri 'self';
+            </parameter>
+            <parameter key="storefront"/>
+            <parameter key="installer"/>
+        </parameter>
+    </parameters>
+
+    <monolog:config>
+        <monolog:channel>business_events</monolog:channel>
+
+        <monolog:handler
+            name="business_event_handler_buffer"
+            type="buffer"
+            handler="business_event_handler">
+            <monolog:channels>
+                <monolog:channel>business_events</monolog:channel>
+            </monolog:channels>
+        </monolog:handler>
+
+        <monolog:handler
+            name="business_event_handler"
+            type="service"
+            id="Laser\Core\Framework\Log\Monolog\DoctrineSQLHandler">
+            <monolog:channels>
+                <monolog:channel>business_events</monolog:channel>
+            </monolog:channels>
+        </monolog:handler>
+    </monolog:config>
+
+    <services>
+        <!-- Asset -->
+        <service id="Laser\Core\Framework\Adapter\Asset\AssetPackageService" public="true">
+            <argument type="service" id="assets.packages"/>
+            <argument type="service" id="laser.asset.asset_without_versioning"/>
+            <argument type="service" id="laser.asset.asset.version_strategy"/>
+        </service>
+
+        <!-- Database / Doctrine -->
+        <service id="Doctrine\DBAL\Connection" public="true">
+            <factory class="Laser\Core\Kernel" method="getConnection"/>
+
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\QueryDataBagResolver">
+            <tag name="controller.argument_value_resolver" priority="1000"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\RequestDataBagResolver">
+            <tag name="controller.argument_value_resolver" priority="1000"/>
+        </service>
+
+        <!-- Cache -->
+        <service class="Cocur\Slugify\Slugify" public="false" id="slugify">
+            <argument>%laser.slug.config%</argument>
+        </service>
+
+        <!-- Migration -->
+        <service id="Laser\Core\Framework\Migration\MigrationSource.core"
+                 class="Laser\Core\Framework\Migration\MigrationSource">
+            <argument type="string">core</argument>
+            <tag name="laser.migration_source"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\MigrationSource.core.V6_3"
+                 class="Laser\Core\Framework\Migration\MigrationSource">
+            <argument type="string">core.V6_3</argument>
+
+            <tag name="laser.migration_source"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\MigrationSource.core.V6_4"
+                 class="Laser\Core\Framework\Migration\MigrationSource">
+            <argument type="string">core.V6_4</argument>
+            <tag name="laser.migration_source"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\MigrationSource.core.V6_5"
+                 class="Laser\Core\Framework\Migration\MigrationSource">
+            <argument type="string">core.V6_5</argument>
+            <tag name="laser.migration_source"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\MigrationSource.core.V6_6"
+                 class="Laser\Core\Framework\Migration\MigrationSource">
+            <argument type="string">core.V6_6</argument>
+            <tag name="laser.migration_source"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\MigrationSource.null"
+                 class="Laser\Core\Framework\Migration\MigrationSource">
+            <argument type="string">null</argument>
+            <argument type="collection"/>
+
+            <tag name="laser.migration_source"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\MigrationRuntime">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\MigrationCollectionLoader" public="true">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Laser\Core\Framework\Migration\MigrationRuntime"/>
+            <argument type="tagged" tag="laser.migration_source"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\Command\CreateMigrationCommand">
+            <argument type="service" id="Laser\Core\Framework\Plugin\KernelPluginCollection"/>
+            <argument>%kernel.laser_core_dir%</argument>
+            <argument>%kernel.laser_version%</argument>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\Command\RefreshMigrationCommand">
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\Command\MigrationCommand">
+            <argument type="service" id="Laser\Core\Framework\Migration\MigrationCollectionLoader"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="string">%kernel.laser_version%</argument>
+
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Demodata\PersonalData\CleanPersonalDataCommand">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="customer.repository"/>
+
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\Command\MigrationDestructiveCommand">
+            <argument type="service" id="Laser\Core\Framework\Migration\MigrationCollectionLoader"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="string">%kernel.laser_version%</argument>
+
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Migration\IndexerQueuer" public="true">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <!-- Serializer -->
+        <service id="Laser\Core\Framework\Struct\Serializer\StructNormalizer">
+            <tag name="serializer.normalizer"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Struct\Serializer\StructDecoder">
+            <tag name="serializer.encoder"/>
+        </service>
+
+        <!-- Routing -->
+        <service id="Laser\Core\Framework\Routing\ContextResolverListener">
+            <argument type="service" id="Laser\Core\Framework\Routing\ApiRequestContextResolver"/>
+
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\CoreSubscriber">
+            <argument>%laser.security.csp_templates%</argument>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\SymfonyRouteScopeWhitelist">
+            <tag name="laser.route_scope_whitelist"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\PaymentScopeWhitelist">
+            <tag name="laser.route_scope_whitelist"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\RouteScopeListener">
+            <argument type="service" id="Laser\Core\Framework\Routing\RouteScopeRegistry"/>
+            <argument type="service" id="request_stack"/>
+            <argument type="tagged" tag="laser.route_scope_whitelist"/>
+
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\CanonicalRedirectService" public="true">
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\RouteEventSubscriber">
+            <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <!-- Custom Entity -->
+        <service id="Laser\Core\System\CustomEntity\Xml\Config\CustomEntityEnrichmentService">
+            <argument type="service" id="Laser\Core\System\CustomEntity\Xml\Config\AdminUi\AdminUiXmlSchemaValidator"/>
+        </service>
+
+        <service id="Laser\Core\System\CustomEntity\CustomEntityLifecycleService">
+            <argument type="service" id="Laser\Core\System\CustomEntity\Schema\CustomEntityPersister"/>
+            <argument type="service" id="Laser\Core\System\CustomEntity\Schema\CustomEntitySchemaUpdater"/>
+            <argument type="service" id="Laser\Core\System\CustomEntity\Xml\Config\CustomEntityEnrichmentService"/>
+            <argument type="service" id="Laser\Core\System\CustomEntity\Xml\CustomEntityXmlSchemaValidator"/>
+            <argument>%kernel.project_dir%</argument>
+        </service>
+
+        <!-- Translation -->
+        <service id="Laser\Core\Framework\Adapter\Translation\Translator"
+                 decorates="translator">
+            <argument type="service" id="Laser\Core\Framework\Adapter\Translation\Translator.inner"/>
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="translator.formatter"/>
+            <argument type="service" id="Laser\Core\System\Snippet\SnippetService"/>
+            <argument>%kernel.environment%</argument>
+            <argument type="service" id="snippet_set.repository"/>
+            <argument type="service" id="Laser\Core\System\Locale\LanguageLocaleCodeProvider"/>
+
+            <tag name="monolog.logger"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Translation\TranslatorCacheInvalidate">
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheInvalidator"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Snippets -->
+        <service id="Laser\Core\System\Snippet\SnippetService">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Laser\Core\System\Snippet\Files\SnippetFileCollection"/>
+            <argument type="service" id="snippet.repository"/>
+            <argument type="service" id="snippet_set.repository"/>
+            <argument type="service" id="sales_channel_domain.repository"/>
+            <argument type="service" id="Laser\Core\System\Snippet\Filter\SnippetFilterFactory"/>
+            <argument type="service" id="service_container" />
+            <argument type="service" id="Laser\Storefront\Theme\SalesChannelThemeLoader" on-invalid="null" />
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Api\SnippetController" public="true">
+            <argument type="service" id="Laser\Core\System\Snippet\SnippetService"/>
+            <argument type="service" id="Laser\Core\System\Snippet\Files\SnippetFileCollection"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Files\SnippetFileLoader">
+            <argument type="service" id="Symfony\Component\HttpKernel\KernelInterface"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Laser\Core\System\Snippet\Files\AppSnippetFileLoader"/>
+            <argument type="service" id="Laser\Core\Framework\App\ActiveAppsLoader"/>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Files\AppSnippetFileLoader">
+            <argument>%kernel.project_dir%</argument>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Files\SnippetFileCollection" public="true" lazy="true">
+            <factory service="Laser\Core\System\Snippet\Files\SnippetFileCollectionFactory"
+                     method="createSnippetFileCollection"/>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Files\SnippetFileCollectionFactory">
+            <argument type="service" id="Laser\Core\System\Snippet\Files\SnippetFileLoader"/>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Filter\SnippetFilterFactory" public="true">
+            <argument type="tagged" tag="laser.snippet.filter"/>
+        </service>
+
+        <!--SnippetFilters-->
+        <service id="Laser\Core\System\Snippet\Filter\AuthorFilter">
+            <tag name="laser.snippet.filter"/>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Filter\AddedFilter">
+            <tag name="laser.snippet.filter"/>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Filter\EditedFilter">
+            <tag name="laser.snippet.filter"/>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Filter\EmptySnippetFilter">
+            <tag name="laser.snippet.filter"/>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Filter\NamespaceFilter">
+            <tag name="laser.snippet.filter"/>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Filter\TermFilter">
+            <tag name="laser.snippet.filter"/>
+        </service>
+
+        <service id="Laser\Core\System\Snippet\Filter\TranslationKeyFilter">
+            <tag name="laser.snippet.filter"/>
+        </service>
+
+        <!-- Twig -->
+        <service id="Laser\Core\Framework\Adapter\Twig\TemplateFinder" public="true">
+            <argument type="service" id="twig"/>
+            <argument type="service" id="twig.loader"/>
+            <argument>%kernel.cache_dir%</argument>
+            <argument type="service"
+                      id="Laser\Core\Framework\Adapter\Twig\NamespaceHierarchy\NamespaceHierarchyBuilder"/>
+
+            <tag name="kernel.reset" method="reset"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\NamespaceHierarchy\NamespaceHierarchyBuilder">
+            <argument type="tagged" tag="laser.twig.hierarchy_builder"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\NamespaceHierarchy\BundleHierarchyBuilder">
+            <argument type="service" id="kernel"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+
+            <tag name="laser.twig.hierarchy_builder" priority="1000"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\Extension\NodeExtension">
+            <argument type="service" id="Laser\Core\Framework\Adapter\Twig\TemplateFinder"/>
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\Extension\PhpSyntaxExtension">
+            <tag name="twig.extension" />
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\Extension\FeatureFlagExtension">
+            <tag name="twig.extension"/>
+        </service>
+
+        <service class="Twig\Extra\Intl\IntlExtension" id="twig.extension.intl">
+            <tag name="twig.extension"/>
+        </service>
+
+        <service class="Twig\Extra\String\StringExtension" id="twig.extension.string">
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\Extension\PcreExtension">
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\Extension\InstanceOfExtension">
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\Filter\CurrencyFilter">
+            <argument type="service" id="Laser\Core\System\Currency\CurrencyFormatter"/>
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="Cocur\Slugify\Bridge\Twig\SlugifyExtension">
+            <argument type="service" id="slugify"/>
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\Filter\ReplaceRecursiveFilter">
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\SecurityExtension">
+            <argument>%laser.twig.allowed_php_functions%</argument>
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\StringTemplateRenderer">
+            <argument type="service" id="twig"/>
+            <argument>%kernel.cache_dir%</argument>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\TemplateIterator"
+                 decorates="twig.template_iterator"
+                 public="true">
+            <argument type="service" id="Laser\Core\Framework\Adapter\Twig\TemplateIterator.inner"/>
+            <argument>%kernel.bundles%</argument>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\EntityTemplateLoader">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument>%kernel.environment%</argument>
+
+            <tag name="twig.loader"/>
+            <tag name="kernel.event_subscriber"/>
+            <tag name="kernel.reset" method="reset"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\AppTemplateIterator"
+                 decorates="twig.template_iterator"
+                 public="true">
+            <argument type="service" id="Laser\Core\Framework\Adapter\Twig\AppTemplateIterator.inner"/>
+            <argument type="service" id="app_template.repository"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\TwigVariableParser">
+            <argument type="service" id="twig" />
+            <deprecated package="laser/core" version="6.6.0.0">tag:v6.6.0 - The %service_id% service will be removed in v6.6.0.0 use "TwigVariableParserFactory" instead.</deprecated>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Twig\TwigVariableParserFactory"/>
+
+        <service id="Laser\Core\Framework\Routing\ApiRequestContextResolver">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Laser\Core\Framework\Routing\RouteScopeRegistry"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\SalesChannelRequestContextResolver"
+                 decorates="Laser\Core\Framework\Routing\ApiRequestContextResolver">
+            <argument type="service" id="Laser\Core\Framework\Routing\SalesChannelRequestContextResolver.inner"/>
+            <argument type="service" id="Laser\Core\System\SalesChannel\Context\SalesChannelContextService"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="Laser\Core\Framework\Routing\RouteScopeRegistry"/>
+        </service>
+
+        <service id="Laser\Core\Checkout\Cart\ApiOrderCartService">
+            <argument type="service" id="Laser\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <argument type="service" id="Laser\Core\System\SalesChannel\Context\SalesChannelContextPersister"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Api\Controller\SalesChannelProxyController" public="true">
+            <argument type="service" id="kernel"/>
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="Laser\Core\Framework\Validation\DataValidator"/>
+            <argument type="service" id="Laser\Core\System\SalesChannel\Context\SalesChannelContextPersister"/>
+            <argument type="service" id="Laser\Core\Framework\Routing\SalesChannelRequestContextResolver"/>
+            <argument type="service" id="Laser\Core\System\SalesChannel\Context\SalesChannelContextService"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="Laser\Core\Checkout\Cart\ApiOrderCartService"/>
+            <argument type="service" id="Laser\Core\Checkout\Cart\SalesChannel\CartOrderRoute"/>
+            <argument type="service" id="Laser\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="request_stack"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\RouteScope">
+            <tag name="laser.route_scope"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\ApiRouteScope">
+            <tag name="laser.route_scope"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\StoreApiRouteScope">
+            <tag name="laser.route_scope"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\RouteScopeRegistry">
+            <argument type="tagged" tag="laser.route_scope"/>
+        </service>
+
+        <!-- Logging -->
+        <service id="Laser\Core\Framework\Log\LoggingService">
+            <argument>%kernel.environment%</argument>
+            <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="monolog.logger.business_events"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Log\ScheduledTask\LogCleanupTask">
+            <tag name="laser.scheduled.task"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Log\ScheduledTask\LogCleanupTaskHandler">
+            <argument type="service" id="scheduled_task.repository"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService" />
+            <argument type="service" id="Doctrine\DBAL\Connection" />
+
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Log\Monolog\DoctrineSQLHandler">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Log\LogEntryDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\CacheIdLoader" public="true">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="cache.messenger.restart_workers_signal"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\CacheStateSubscriber">
+            <argument type="service" id="Laser\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\CacheTracer">
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Translation\Translator"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheTagCollection"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\CacheInvalidator">
+            <argument>%laser.cache.invalidation.delay%</argument>
+            <argument>%laser.cache.invalidation.count%</argument>
+            <argument type="collection">
+                <argument type="service" id="cache.object"/>
+                <argument type="service" id="cache.http"/>
+            </argument>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\InvalidateCacheTask">
+            <tag name="laser.scheduled.task" />
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\InvalidateCacheTaskHandler">
+            <argument type="service" id="scheduled_task.repository"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheInvalidator"/>
+            <argument>%laser.cache.invalidation.delay%</argument>
+
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\CacheClearer">
+            <argument type="collection">
+                <argument type="service" id="cache.object"/>
+                <argument type="service" id="cache.http"/>
+            </argument>
+            <argument type="service" id="cache_clearer"/>
+            <argument type="service" id="filesystem"/>
+            <argument>%kernel.cache_dir%</argument>
+            <argument>%kernel.environment%</argument>
+            <argument type="service" id="messenger.bus.laser"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\Message\CleanupOldCacheFoldersHandler">
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheClearer"/>
+
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\Script\Facade\CacheInvalidatorFacadeHookFactory" public="true">
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheInvalidator"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\Script\ScriptCacheInvalidationSubscriber">
+            <argument type="service" id="Laser\Core\Framework\Script\Execution\ScriptExecutor"/>
+
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Laser\Core\Content\Media\Message\GenerateThumbnailsHandler">
+            <argument type="service" id="Laser\Core\Content\Media\Thumbnail\ThumbnailService"/>
+            <argument type="service" id="media.repository"/>
+
+            <tag name="messenger.message_handler"/>
+        </service>
+
+
+        <!-- Changelog -->
+        <service id="Laser\Core\Framework\Changelog\Processor\ChangelogGenerator" public="false">
+            <argument type="service" id="Laser\Core\Framework\Changelog\ChangelogParser"/>
+            <argument type="service" id="validator"/>
+            <argument type="service" id="filesystem"/>
+            <argument>%kernel.project_dir%</argument>
+            <argument>%laser.feature.flags%</argument>
+        </service>
+
+        <service id="Laser\Core\Framework\Changelog\Processor\ChangelogReleaseCreator">
+            <argument type="service" id="Laser\Core\Framework\Changelog\ChangelogParser"/>
+            <argument type="service" id="validator"/>
+            <argument type="service" id="filesystem"/>
+            <argument>%kernel.project_dir%</argument>
+            <argument>%laser.feature.flags%</argument>
+        </service>
+
+        <service id="Laser\Core\Framework\Changelog\Processor\ChangelogReleaseExporter">
+            <argument type="service" id="Laser\Core\Framework\Changelog\ChangelogParser"/>
+            <argument type="service" id="validator"/>
+            <argument type="service" id="filesystem"/>
+            <argument>%kernel.project_dir%</argument>
+            <argument>%laser.feature.flags%</argument>
+        </service>
+
+        <service id="Laser\Core\Framework\Changelog\Processor\ChangelogValidator">
+            <argument type="service" id="Laser\Core\Framework\Changelog\ChangelogParser"/>
+            <argument type="service" id="validator"/>
+            <argument type="service" id="filesystem"/>
+            <argument>%kernel.project_dir%</argument>
+            <argument>%laser.feature.flags%</argument>
+        </service>
+
+        <service id="Laser\Core\Framework\Changelog\ChangelogParser" public="false" />
+
+        <service id="Laser\Core\Framework\Changelog\Command\ChangelogCreateCommand">
+            <argument type="service" id="Laser\Core\Framework\Changelog\Processor\ChangelogGenerator"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Changelog\Command\ChangelogReleaseCommand">
+            <argument type="service" id="Laser\Core\Framework\Changelog\Processor\ChangelogReleaseCreator"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Changelog\Command\ChangelogChangeCommand">
+            <argument type="service" id="Laser\Core\Framework\Changelog\Processor\ChangelogReleaseExporter"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Changelog\Command\ChangelogCheckCommand">
+            <argument type="service" id="Laser\Core\Framework\Changelog\Processor\ChangelogValidator"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Util -->
+        <service id="Laser\Core\Framework\Log\LoggerFactory">
+            <argument type="string">%kernel.logs_dir%/%%s_%kernel.environment%.log</argument>
+            <argument>%laser.logger.file_rotation_count%</argument>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\Annotation\CriteriaValueResolver">
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Search\RequestCriteriaBuilder"/>
+            <tag name="controller.argument_value_resolver"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Feature\Command\FeatureDumpCommand">
+            <argument type="service" id="kernel"/>
+
+            <tag name="console.command"/>
+            <tag name="console.command" command="administration:dump:features"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Command\S3FilesystemVisibilityCommand">
+            <argument type="service" id="laser.filesystem.private"/>
+            <argument type="service" id="laser.filesystem.public"/>
+            <argument type="service" id="laser.filesystem.theme"/>
+            <argument type="service" id="laser.filesystem.sitemap"/>
+            <argument type="service" id="laser.filesystem.asset"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\CacheInvalidationSubscriber">
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheInvalidator"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\CacheTagCollection"/>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\CacheDecorator" decorates="cache.object">
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheDecorator.inner"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheTagCollection"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Util\HtmlSanitizer" public="true">
+            <argument>%laser.html_sanitizer.cache_dir%</argument>
+            <argument>%laser.html_sanitizer.cache_enabled%</argument>
+            <argument>%laser.html_sanitizer.sets%</argument>
+            <argument>%laser.html_sanitizer.fields%</argument>
+        </service>
+
+        <service id="Laser\Core\Framework\Log\Monolog\ExcludeExceptionHandler" decorates="monolog.handler.main" decoration-on-invalid="ignore">
+            <argument type="service" id="Laser\Core\Framework\Log\Monolog\ExcludeExceptionHandler.inner"/>
+            <argument>%laser.logger.exclude_exception%</argument>
+        </service>
+
+        <service id="Laser\Core\Framework\Log\Monolog\ExcludeFlowEventHandler" decorates="monolog.handler.main" decoration-on-invalid="ignore">
+            <argument type="service" id="Laser\Core\Framework\Log\Monolog\ExcludeExceptionHandler.inner"/>
+            <argument>%laser.logger.exclude_events%</argument>
+        </service>
+
+        <service id="Laser\Core\Framework\Routing\RouteParamsCleanupListener">
+            <tag name="kernel.event_listener"/>
+        </service>
+
+        <service id="Laser\Core\Framework\Adapter\Cache\RedisConnectionFactory">
+            <argument>%laser.cache.redis_prefix%</argument>
+        </service>
+    </services>
+</container>

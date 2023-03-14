@@ -1,0 +1,35 @@
+<?php declare(strict_types=1);
+
+namespace Laser\Core\Framework\DataAbstractionLayer\Write\Command;
+
+use Laser\Core\Framework\Api\Acl\Role\AclRoleDefinition;
+use Laser\Core\Framework\DataAbstractionLayer\EntityDefinition;
+use Laser\Core\Framework\DataAbstractionLayer\Write\EntityExistence;
+use Laser\Core\Framework\Log\Package;
+
+#[Package('core')]
+class DeleteCommand extends WriteCommand implements ChangeSetAware
+{
+    use ChangeSetAwareTrait;
+
+    /**
+     * @param array<string> $primaryKey
+     */
+    public function __construct(
+        EntityDefinition $definition,
+        array $primaryKey,
+        EntityExistence $existence
+    ) {
+        parent::__construct($definition, [], $primaryKey, $existence, '');
+    }
+
+    public function isValid(): bool
+    {
+        return (bool) \count($this->primaryKey);
+    }
+
+    public function getPrivilege(): ?string
+    {
+        return AclRoleDefinition::PRIVILEGE_DELETE;
+    }
+}

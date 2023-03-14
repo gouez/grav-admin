@@ -1,0 +1,505 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\ProductExceptionHandler">
+            <tag name="laser.dal.exception_handler"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Sorting\ProductSortingExceptionHandler">
+            <tag name="laser.dal.exception_handler"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\ProductDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductStreamMapping\ProductStreamMappingDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\SalesChannelProductDefinition">
+            <tag name="laser.sales_channel.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductCategory\ProductCategoryDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductCustomFieldSet\ProductCustomFieldSetDefinition">
+            <tag name="laser.entity.definition" entity="product_custom_field_set"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductTag\ProductTagDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductConfiguratorSetting\ProductConfiguratorSettingDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductPrice\ProductPriceDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductProperty\ProductPropertyDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductSearchKeyword\ProductSearchKeywordDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductKeywordDictionary\ProductKeywordDictionaryDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductReview\ProductReviewDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductManufacturer\ProductManufacturerDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductManufacturerTranslation\ProductManufacturerTranslationDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductMedia\ProductMediaDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductDownload\ProductDownloadDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductTranslation\ProductTranslationDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductOption\ProductOptionDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductCategoryTree\ProductCategoryTreeDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductCrossSelling\ProductCrossSellingDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductCrossSellingTranslation\ProductCrossSellingTranslationDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductCrossSellingAssignedProducts\ProductCrossSellingAssignedProductsDefinition">
+            <tag name="laser.entity.definition" entity="product_cross_selling_assigned_products"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductFeatureSet\ProductFeatureSetDefinition">
+            <tag name="laser.entity.definition" entity="product_feature_set"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductFeatureSetTranslation\ProductFeatureSetTranslationDefinition">
+            <tag name="laser.entity.definition" entity="product_feature_set_translation"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Sorting\ProductSortingDefinition">
+            <tag name="laser.entity.definition" entity="product_sorting"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Sorting\ProductSortingTranslationDefinition">
+            <tag name="laser.entity.definition" entity="product_sorting_translation"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductSearchConfig\ProductSearchConfigDefinition">
+            <tag name="laser.entity.definition" entity="product_search_config"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductSearchConfigField\ProductSearchConfigFieldDefinition">
+            <tag name="laser.entity.definition" entity="product_search_config_field"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductSearchConfigField\ProductSearchConfigFieldExceptionHandler">
+            <tag name="laser.dal.exception_handler"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductSearchConfig\ProductSearchConfigExceptionHandler">
+            <tag name="laser.dal.exception_handler"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cart\ProductGateway">
+            <argument type="service" id="sales_channel.product.repository"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\AbstractPropertyGroupSorter" class="Laser\Core\Content\Product\PropertyGroupSorter"/>
+
+        <service id="Laser\Core\Content\Product\AbstractProductMaxPurchaseCalculator" class="Laser\Core\Content\Product\ProductMaxPurchaseCalculator">
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\AbstractIsNewDetector" class="Laser\Core\Content\Product\IsNewDetector">
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\ProductVariationBuilder"/>
+
+        <service id="Laser\Core\Content\Product\Subscriber\ProductSubscriber">
+            <argument type="service" id="Laser\Core\Content\Product\ProductVariationBuilder"/>
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Price\ProductPriceCalculator"/>
+            <argument type="service" id="Laser\Core\Content\Product\AbstractPropertyGroupSorter"/>
+            <argument type="service" id="Laser\Core\Content\Product\AbstractProductMaxPurchaseCalculator"/>
+            <argument type="service" id="Laser\Core\Content\Product\AbstractIsNewDetector"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SearchKeyword\ProductSearchKeywordAnalyzer">
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Search\Term\Tokenizer"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Search\Term\Filter\TokenFilter"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Api\ProductActionController" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\Util\VariantCombinationLoader"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Aggregate\ProductVisibility\ProductVisibilityDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Util\VariantCombinationLoader">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Laser\Core\System\DeliveryTime\DeliveryTimeDefinition">
+            <tag name="laser.entity.definition"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cms\ProductBoxCmsElementResolver">
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <tag name="laser.cms.data_resolver" />
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cms\ProductListingCmsElementResolver">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Listing\ProductListingRoute" />
+            <tag name="laser.cms.data_resolver" />
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cms\ProductSliderCmsElementResolver">
+            <argument type="service" id="Laser\Core\Content\ProductStream\Service\ProductStreamBuilder"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <tag name="laser.cms.data_resolver"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cms\ProductNameCmsElementResolver">
+            <tag name="laser.cms.data_resolver" />
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cms\ManufacturerLogoCmsElementResolver">
+            <tag name="laser.cms.data_resolver" />
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cms\CrossSellingCmsElementResolver">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\CrossSelling\ProductCrossSellingRoute"/>
+            <tag name="laser.cms.data_resolver"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cms\ProductDescriptionReviewsCmsElementResolver">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Review\ProductReviewRoute"/>
+            <tag name="laser.cms.data_resolver"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Price\ProductPriceCalculator">
+            <argument type="service" id="unit.repository"/>
+            <argument type="service" id="Laser\Core\Checkout\Cart\Price\QuantityPriceCalculator"/>
+
+            <tag name="kernel.reset" method="reset"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Listing\ProductListingFeaturesSubscriber">
+            <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="property_group_option.repository"/>
+            <argument type="service" id="product_sorting.repository"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SearchKeyword\ProductSearchBuilderInterface"
+                 class="Laser\Core\Content\Product\SearchKeyword\ProductSearchBuilder">
+            <argument type="service" id="Laser\Core\Content\Product\SearchKeyword\ProductSearchTermInterpreter"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cart\ProductLineItemFactory"/>
+
+        <service id="Laser\Core\Content\Product\Cart\ProductLineItemCommandValidator">
+            <argument type="service" id="Doctrine\DBAL\Connection" />
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Suggest\ProductSuggestRoute" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SearchKeyword\ProductSearchBuilderInterface"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Listing\ProductListingLoader"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Suggest\CachedProductSuggestRoute" decorates="Laser\Core\Content\Product\SalesChannel\Suggest\ProductSuggestRoute" decoration-priority="-1000" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Suggest\CachedProductSuggestRoute.inner"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Cache\EntityCacheKeyGenerator"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheTracer"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument>%laser.cache.invalidation.product_suggest_route%</argument>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Search\ProductSearchRoute" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SearchKeyword\ProductSearchBuilderInterface"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Listing\ProductListingLoader"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Search\ResolvedCriteriaProductSearchRoute" decorates="Laser\Core\Content\Product\SalesChannel\Search\ProductSearchRoute" decoration-priority="-2000" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Search\ResolvedCriteriaProductSearchRoute.inner"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Search\RequestCriteriaBuilder"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Search\CachedProductSearchRoute" decorates="Laser\Core\Content\Product\SalesChannel\Search\ProductSearchRoute" decoration-priority="-1000" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Search\CachedProductSearchRoute.inner"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Cache\EntityCacheKeyGenerator"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheTracer"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument>%laser.cache.invalidation.product_search_route%</argument>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Listing\ResolveCriteriaProductListingRoute" decorates="Laser\Core\Content\Product\SalesChannel\Listing\ProductListingRoute" decoration-priority="-2000" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Listing\ResolveCriteriaProductListingRoute.inner"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\FindVariant\FindProductVariantRoute" public="true">
+            <argument type="service" id="sales_channel.product.repository"/>
+        </service>
+
+        <!-- decorated by resolve criteria route -->
+        <service id="Laser\Core\Content\Product\SalesChannel\Listing\CachedProductListingRoute" decorates="Laser\Core\Content\Product\SalesChannel\Listing\ProductListingRoute" decoration-priority="-1000" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Listing\CachedProductListingRoute.inner"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Cache\EntityCacheKeyGenerator"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheTracer"/>
+            <argument type="service" id="event_dispatcher" />
+            <argument>%laser.cache.invalidation.product_listing_route%</argument>
+        </service>
+
+        <!-- decorated by cached route -->
+        <service id="Laser\Core\Content\Product\SalesChannel\Listing\ProductListingRoute" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Listing\ProductListingLoader" />
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="category.repository"/>
+            <argument type="service" id="Laser\Core\Content\ProductStream\Service\ProductStreamBuilder"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\ProductIndexer">
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Dbal\Common\IteratorFactory"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Laser\Core\Content\Product\DataAbstractionLayer\VariantListingUpdater"/>
+            <argument type="service" id="Laser\Core\Content\Product\DataAbstractionLayer\ProductCategoryDenormalizer"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Indexing\InheritanceUpdater"/>
+            <argument type="service" id="Laser\Core\Content\Product\DataAbstractionLayer\RatingAverageUpdater"/>
+            <argument type="service" id="Laser\Core\Content\Product\DataAbstractionLayer\SearchKeywordUpdater"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Indexing\ChildCountUpdater"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Indexing\ManyToManyIdFieldUpdater"/>
+            <argument type="service" id="Laser\Core\Content\Product\DataAbstractionLayer\StockUpdater"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="Laser\Core\Content\Product\DataAbstractionLayer\CheapestPriceUpdater"/>
+            <argument type="service" id="Laser\Core\Content\Product\DataAbstractionLayer\ProductStreamUpdater"/>
+            <argument type="service" id="Laser\Core\Content\Product\DataAbstractionLayer\StatesUpdater"/>
+            <argument type="service" id="messenger.bus.laser"/>
+            <tag name="laser.entity_indexer" priority="100"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\ProductStreamUpdater">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Laser\Core\Content\Product\ProductDefinition"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="messenger.bus.laser"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Indexing\ManyToManyIdFieldUpdater"/>
+            <tag name="laser.entity_indexer"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\StatesUpdater">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\VariantListingUpdater">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\ProductCategoryDenormalizer">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\CheapestPriceUpdater">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Laser\Core\Content\Product\DataAbstractionLayer\CheapestPriceQuantitySelector"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\CheapestPriceQuantitySelector"/>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\RatingAverageUpdater">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\SearchKeywordUpdater">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="language.repository"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="Laser\Core\Content\Product\SearchKeyword\ProductSearchKeywordAnalyzer"/>
+            <tag name="kernel.reset" method="reset"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\StockUpdate\StockUpdateFilterProvider">
+            <argument type="tagged_iterator" tag="laser.product.stock_filter"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\StockUpdater">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="Laser\Core\Content\Product\DataAbstractionLayer\StockUpdate\StockUpdateFilterProvider"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Listing\ProductListingLoader">
+            <argument type="service" id="sales_channel.product.repository"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\ProductCloseoutFilterFactory"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Detail\ProductDetailRoute" public="true">
+            <argument type="service" id="sales_channel.product.repository"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Detail\ProductConfiguratorLoader"/>
+            <argument type="service" id="Laser\Core\Content\Category\Service\CategoryBreadcrumbBuilder"/>
+            <argument type="service" id="Laser\Core\Content\Cms\SalesChannel\SalesChannelCmsPageLoader"/>
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\SalesChannelProductDefinition"/>
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\ProductCloseoutFilterFactory"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Detail\CachedProductDetailRoute" decorates="Laser\Core\Content\Product\SalesChannel\Detail\ProductDetailRoute" decoration-priority="-1000" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Detail\CachedProductDetailRoute.inner"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Cache\EntityCacheKeyGenerator"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheTracer"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument>%laser.cache.invalidation.product_detail_route%</argument>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Review\ProductReviewRoute" public="true">
+            <argument type="service" id="product_review.repository"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Review\CachedProductReviewRoute" decorates="Laser\Core\Content\Product\SalesChannel\Review\ProductReviewRoute" decoration-priority="-1000" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Review\CachedProductReviewRoute.inner"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Cache\EntityCacheKeyGenerator"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheTracer"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument>%laser.cache.invalidation.product_review_route%</argument>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Detail\ProductConfiguratorLoader">
+            <argument type="service" id="product_configurator_setting.repository"/>
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Detail\AvailableCombinationLoader"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Detail\AvailableCombinationLoader">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\CrossSelling\CachedProductCrossSellingRoute" decorates="Laser\Core\Content\Product\SalesChannel\CrossSelling\ProductCrossSellingRoute" decoration-priority="-1000" public="true">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\CrossSelling\CachedProductCrossSellingRoute.inner"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="Laser\Core\Framework\DataAbstractionLayer\Cache\EntityCacheKeyGenerator"/>
+            <argument type="service" id="Laser\Core\Framework\Adapter\Cache\CacheTracer"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument>%laser.cache.invalidation.product_cross_selling_route%</argument>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\CrossSelling\ProductCrossSellingRoute" public="true">
+            <argument type="service" id="product_cross_selling.repository"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="Laser\Core\Content\ProductStream\Service\ProductStreamBuilder"/>
+            <argument type="service" id="sales_channel.product.repository"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Listing\ProductListingLoader"/>
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\ProductCloseoutFilterFactory"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\Review\ProductReviewSaveRoute" public="true">
+            <argument type="service" id="product_review.repository"/>
+            <argument type="service" id="Laser\Core\Framework\Validation\DataValidator"/>
+            <argument type="service" id="Laser\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\ProductListRoute" public="true">
+            <argument type="service" id="sales_channel.product.repository"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cms\BuyBoxCmsElementResolver">
+            <argument type="service" id="Laser\Core\Content\Product\SalesChannel\Detail\ProductConfiguratorLoader"/>
+            <argument type="service" id="product_review.repository"/>
+            <tag name="laser.cms.data_resolver"/>
+        </service>
+
+        <service id="Laser\Core\Framework\DataAbstractionLayer\Search\Term\Filter\TokenFilter">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+
+            <tag name="kernel.reset" method="reset"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\DataAbstractionLayer\CheapestPrice\CheapestPriceAccessorBuilder">
+            <argument>%laser.dal.max_rule_prices%</argument>
+            <argument type="service" id="logger"/>
+
+            <tag name="laser.field_accessor_builder" priority="-200"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cleanup\CleanupProductKeywordDictionaryTask">
+            <tag name="laser.scheduled.task"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cleanup\CleanupProductKeywordDictionaryTaskHandler">
+            <argument type="service" id="scheduled_task.repository"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cleanup\CleanupUnusedDownloadMediaTask">
+            <tag name="laser.scheduled.task"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\Cleanup\CleanupUnusedDownloadMediaTaskHandler">
+            <argument type="service" id="scheduled_task.repository"/>
+            <argument type="service" id="Laser\Core\Content\Media\DeleteNotUsedMediaService"/>
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <service id="Laser\Core\Content\Product\SalesChannel\ProductCloseoutFilterFactory"/>
+    </services>
+</container>
